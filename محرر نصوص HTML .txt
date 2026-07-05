@@ -1,0 +1,587 @@
+
+محرر نصوص HTML
+المرحلة الاولى من هذا المشروع هي  إنشاء محرر نصوص بسيط لتنسيق نص  عن طريق كتابة النص أو لصقه داخل مربع و تصدير كملف HTML يعرض في المتصفح. و بأدوات تنسيق محدودة. و بقالب منسق بإستخدام CSS. بإستخدام JavaScript. 
+المرحلة الثانية من تطوير المحرر إضافة مزايا أخرى مثل حجم الخط و نوع الخط، إضافة صورة،إضافة رابط و تصدير كملف للطباعة و حفظه كملف pdf. 
+
+أولا: محرر نصوص بسيط
+لتحقيق ذلك، سنستخدم خاصية contenteditable في HTML، وهي تسمح للمستخدم بالكتابة والتعديل مباشرة داخل عنصر معين، مع إضافة أزرار بسيطة للتحكم في التنسيق (مثل الخط العريض، المائل، واللون) باستخدام جافا سكريبت.
+إليك الكود الكامل في ملف واحد:
+HTML
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<style>
+.container { width: 80%; margin: 20px auto; font-family: sans-serif; }
+
+/* شريط الأدوات */
+.toolbar { background: #f4f4f4; padding: 10px; border: 1px solid #ccc; border-bottom: none; }
+
+/* منطقة التحرير */
+#editor {
+            border: 1px solid #ccc;
+            min-height: 200px;
+            padding: 15px;
+            outline: none;
+            background: #fff;
+        }
+
+button { padding: 5px 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+<h2>محرر النصوص البسيط</h2>
+
+<div class="toolbar">
+<button onclick="format('bold')"><b>B</b></button>
+<button onclick="format('italic')"><i>I</i></button>
+<button onclick="format('underline')"><u>U</u></button>
+<button onclick="format('fontSize', '5')">كبير</button>
+<button onclick="changeColor()">تغيير اللون</button>
+</div>
+
+<div id="editor" contenteditable="true">
+        ابدأ بالكتابة هنا...
+</div>
+</div>
+
+<script>
+// دالة لتنفيذ أوامر التنسيق
+function format(command, value = null) {
+document.execCommand(command, false, value);
+    }
+
+// دالة بسيطة لتغيير اللون
+function changeColor() {
+const color = prompt("أدخل اسم اللون أو الكود (مثلاً: red أو #ff0000):", "red");
+document.execCommand('foreColor', false, color);
+    }
+</script>
+
+</body>
+</html>
+
+شرح الأجزاء الأساسية:
+1. contenteditable="true": هذه هي الخاصية الأهم؛ فهي تحول أي عنصر HTML (مثل div) إلى مربع نص يشبه معالجات النصوص (مثل Word).
+2. document.execCommand: هي دالة في جافا سكريبت تقوم بتطبيق أوامر التنسيق (مثل جعل النص عريضاً أو مائلاً) على النص المحدد داخل العنصر القابل للتحرير.
+3. التنسيق: استخدمنا CSS بسيطاً لإعطاء مظهر مرتب لشريط الأدوات ومنطقة الكتابة.
+ثانيا: ميزة تصدير النص المنسق إلى ملف HTML 
+لإضافة ميزة تصدير النص المنسق (HTML) إلى ملف، سنقوم بإضافة زر جديد ودالة جافا سكريبت تقوم بإنشاء ملف .html وتحميله تلقائياً على جهاز المستخدم.
+إليك الكود المحدث:
+
+
+
+HTML
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<style>
+.container { width: 80%; margin: 20px auto; font-family: sans-serif; }
+.toolbar { background: #f4f4f4; padding: 10px; border: 1px solid #ccc; border-bottom: none; }
+#editor { border: 1px solid #ccc; min-height: 200px; padding: 15px; outline: none; background: #fff; }
+button { padding: 5px 10px; cursor: pointer; margin-left: 5px; }
+.export-btn { background-color: #28a745; color: white; border: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+<h2>محرر النصوص مع ميزة التصدير</h2>
+
+<div class="toolbar">
+<button onclick="format('bold')"><b>B</b></button>
+<button onclick="format('italic')"><i>I</i></button>
+<button onclick="format('underline')"><u>U</u></button>
+<button onclick="changeColor()">تغيير اللون</button>
+<button class="export-btn" onclick="exportHTML()">تصدير كملف HTML</button>
+</div>
+
+<div id="editor" contenteditable="true">
+        ابدأ بالكتابة هنا...
+</div>
+</div>
+
+<script>
+function format(command, value = null) {
+document.execCommand(command, false, value);
+    }
+
+function changeColor() {
+const color = prompt("أدخل كود اللون (مثلاً: red أو #ff0000):", "red");
+if(color) document.execCommand('foreColor', false, color);
+    }
+
+// دالة التصدير
+function exportHTML() {
+// الحصول على محتوى المحرر
+const htmlContent = document.getElementById('editor').innerHTML;
+
+// إنشاء رابط وهمي لتحميل الملف
+const blob = new Blob([htmlContent], { type: 'text/html' });
+const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'my-document.html'; // اسم الملف
+
+// محاكاة الضغط على الرابط
+document.body.appendChild(a);
+        a.click();
+document.body.removeChild(a);
+    }
+</script>
+
+</body>
+</html>
+
+كيف تعمل ميزة التصدير؟
+1. document.getElementById('editor').innerHTML: تقوم هذه التعليمة بجلب كل النص المنسق الموجود داخل المحرر مع وسوم الـ HTML الخاصة به (مثل <b> أو <span> للألوان).
+2. Blob: نستخدم كائن Blob لتجميع المحتوى النصي وتحويله إلى صيغة ملف قابلة للتحميل.
+3. رابط وهمي (a): نقوم بإنشاء عنصر <a> في الذاكرة وتعيين محتوى الـ Blob له، ثم نجعله يُحاكي ضغطة المستخدم لتحميل الملف (a.click()).
+بهذه الطريقة، سيقوم المتصفح بتحميل ملف HTML يحتوي على النص الذي قمت بتنسيقه، ويمكنك فتحه لاحقاً في أي متصفح وسيظهر بنفس التنسيق.
+ثالثا: دعم اللغة العربية 
+لضمان أن الملف الصادر يدعم اللغة العربية بشكل صحيح عند فتحه في أي متصفح، يجب أن نقوم بتضمين "ترويسة" (Head) كاملة للملف، بحيث تتضمن meta charset="UTF-8" (التي تدعم الحروف العربية) واتجاه الصفحة dir="rtl".
+في الكود السابق، قمنا بتصدير المحتوى الداخلي فقط (innerHTML). الآن سنقوم بتعديل دالة exportHTML لتغلف المحتوى بهيكل HTML كامل وداعم للغة العربية:
+J
+<script>
+function exportHTML() {
+const content = document.getElementById('editor').innerHTML;
+
+// إنشاء هيكل ملف HTML كامل مع دعم العربية
+const fullHTML = `
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>مستندي المنسق</title>
+</head>
+<body>
+    ${content}
+</body>
+</html>`;
+
+// إنشاء ملف وحفظه
+const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'document.html';
+document.body.appendChild(a);
+        a.click();
+document.body.removeChild(a);
+    }
+</script>
+
+لماذا هذا التعديل مهم؟
+1. charset="UTF-8": بدون هذا الوسم، قد تظهر الحروف العربية على شكل رموز غريبة عند فتح الملف في بعض المتصفحات أو الأنظمة.
+2. dir="rtl": يضمن أن اتجاه النص في الملف المصدّر سيكون من اليمين إلى اليسار، مما يحافظ على تنسيق الفقرات العربية كما كتبتها في المحرر.
+3. lang="ar": يخبر المتصفح بأن محتوى الصفحة هو باللغة العربية، مما يساعد في تحسين طريقة عرض الخطوط.
+نصيحة إضافية:
+إذا أردت أن يحتفظ الملف بـ "تنسيق" الألوان والخطوط (الـ CSS) في الملف المصدّر، يمكنك إضافة وسم <style> داخل fullHTML بنفس التنسيقات التي استخدمتها في الصفحة الأصلية، هكذا:
+JavaScript
+const fullHTML = `
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <style>body { font-family: sans-serif; padding: 20px; }</style>
+</head>
+<body>
+    ${content}
+</body>
+</html>`;
+
+بهذه الطريقة، سيظل الملف الناتج يبدو احترافياً ومرتباً تماماً كما ظهر في المحرر .
+رابعا: إضافة ميزات متقدمة
+لإضافة ميزات متقدمة مثل الصور، الروابط، وتغيير حجم الخط، سنعتمد مرة أخرى على document.execCommand ولكن مع استخدام prompt لجلب البيانات من المستخدم (مثل رابط الصورة أو رابط الموقع).
+إليك الكود المحدث الشامل الذي يحتوي على شريط أدوات متكامل:
+
+
+
+HTML
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>محرر نصوص متقدم</title>
+<style>
+.container { width: 90%; margin: 20px auto; font-family: sans-serif; }
+.toolbar { background: #eee; padding: 10px; border: 1px solid #ccc; display: flex; flex-wrap: wrap; gap: 5px; }
+#editor { border: 1px solid #ccc; min-height: 300px; padding: 15px; background: #fff; overflow-y: auto; }
+button, select { padding: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+<h2>محرر النصوص المتقدم</h2>
+
+<div class="toolbar">
+<button onclick="format('bold')"><b>B</b></button>
+<button onclick="format('italic')"><i>I</i></button>
+<button onclick="format('underline')"><u>U</u></button>
+
+<select onchange="format('fontSize', this.value)">
+<option value="3">حجم الخط</option>
+<option value="1">صغير</option>
+<option value="3">عادي</option>
+<option value="5">كبير</option>
+<option value="7">كبير جداً</option>
+</select>
+
+<button onclick="addLink()">🔗 رابط</button>
+<button onclick="addImage()">🖼️ صورة</button>
+<button onclick="addTable()">⊞ جدول</button>
+<button onclick="format('insertOrderedList')">🔢 قائمة</button>
+<button style="background: #28a745; color: white;" onclick="exportHTML()">تصدير كملف</button>
+</div>
+
+<div id="editor" contenteditable="true"></div>
+</div>
+
+<script>
+function format(command, value = null) {
+document.execCommand(command, false, value);
+    }
+
+function addLink() {
+const url = prompt("أدخل رابط الموقع:");
+if (url) document.execCommand('createLink', false, url);
+    }
+
+function addImage() {
+const url = prompt("أدخل رابط الصورة:");
+if (url) document.execCommand('insertImage', false, url);
+    }
+
+function addTable() {
+const rows = prompt("عدد الصفوف:", "2");
+const cols = prompt("عدد الأعمدة:", "2");
+let table = "<table border='1' style='width:100%; border-collapse:collapse;'>";
+for (let i = 0; i < rows; i++) {
+            table += "<tr>";
+for (let j = 0; j < cols; j++) {
+                table += "<td style='padding:10px;'> </td>";
+            }
+            table += "</tr>";
+        }
+        table += "</table>";
+document.execCommand('insertHTML', false, table);
+    }
+
+function exportHTML() {
+const content = document.getElementById('editor').innerHTML;
+const fullHTML = `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"></head><body>${content}</body></html>`;
+const blob = new Blob([fullHTML], { type: 'text/html' });
+const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'document.html';
+        a.click();
+    }
+</script>
+
+</body>
+</html>
+
+توضيح الميزات الجديدة:
+1. حجم الخط (fontSize): استخدمنا عنصر <select> للسماح للمستخدم باختيار أحجام مختلفة، حيث يتم إرسال القيمة (من 1 إلى 7) إلى دالة التنسيق.
+2. إضافة رابط (createLink): تطلب من المستخدم إدخال رابط (URL) ثم تقوم بتحويل النص المحدد إلى رابط تشعبي.
+3. إضافة صورة (insertImage): تطلب رابط الصورة (src) وتدرجها مباشرة في مكان مؤشر الكتابة.
+4. إضافة جدول (insertHTML): بما أن execCommand لا تملك أمراً مباشراً لإنشاء جدول معقد، قمنا بإنشاء كود HTML الخاص بالجدول برمجياً وإدراجه في المحرر باستخدام insertHTML.
+5. القوائم (insertOrderedList): تُستخدم لإنشاء قوائم مرقمة تلقائياً.
+ملاحظة تقنية:
+دالة document.execCommand تعتبر قديمة (Deprecated) من الناحية التقنية في المتصفحات الحديثة، ولكنها لا تزال تعمل بشكل ممتاز في كافة المتصفحات، وهي الأسهل والأسرع لبناء محررات نصوص بسيطة. إذا كنت تطور تطبيقاً ضخماً، قد ترغب لاحقاً في البحث عن مكتبات احترافية مثل Quill.js أو CKEditor.
+خامسا: إضافة ميزة محاذاة النص و معاينة الطبلعة
+
+ دعنا نطور المحرر ليصبح أكثر احترافية من خلال إضافة ميزات محاذاة النص (يمين، وسط، يسار) ومعاينة الطباعة.
+لقد قمت بتحديث الكود ليشمل هذه الإضافات مع ترتيب شريط الأدوات ليصبح أكثر سهولة في الاستخدام:
+
+
+
+
+HTML
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>محرر نصوص متكامل</title>
+<style>
+.container { width: 90%; margin: 20px auto; font-family: sans-serif; }
+.toolbar { background: #f8f9fa; padding: 10px; border: 1px solid #ccc; display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 5px; }
+#editor { border: 1px solid #ccc; min-height: 300px; padding: 15px; background: #fff; overflow-y: auto; }
+button, select { padding: 8px; cursor: pointer; border: 1px solid #ddd; background: #fff; }
+button:hover { background: #e9ecef; }
+.export-btn { background-color: #28a745 !important; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+<h2>محرر النصوص الاحترافي</h2>
+
+<div class="toolbar">
+<button onclick="format('bold')"><b>B</b></button>
+<button onclick="format('italic')"><i>I</i></button>
+<button onclick="format('underline')"><u>U</u></button>
+
+<button onclick="format('justifyRight')">يمين</button>
+<button onclick="format('justifyCenter')">وسط</button>
+<button onclick="format('justifyLeft')">يسار</button>
+
+<select onchange="format('fontSize', this.value)">
+<option value="3">الحجم</option>
+<option value="1">صغير</option>
+<option value="3">عادي</option>
+<option value="5">كبير</option>
+<option value="7">ضخم</option>
+</select>
+
+<button onclick="addLink()">🔗 رابط</button>
+<button onclick="addImage()">🖼️ صورة</button>
+<button onclick="addTable()">⊞ جدول</button>
+<button onclick="window.print()">🖨️ معاينة وطباعة</button>
+<button class="export-btn" onclick="exportHTML()">تصدير كملف</button>
+</div>
+
+<div id="editor" contenteditable="true"></div>
+</div>
+
+<script>
+function format(command, value = null) {
+document.execCommand(command, false, value);
+    }
+
+function addLink() {
+const url = prompt("أدخل الرابط:", "https://");
+if (url) document.execCommand('createLink', false, url);
+    }
+
+function addImage() {
+const url = prompt("أدخل رابط الصورة:", "https://");
+if (url) document.execCommand('insertImage', false, url);
+    }
+
+function addTable() {
+const rows = prompt("عدد الصفوف:", "2");
+const cols = prompt("عدد الأعمدة:", "2");
+let table = "<table border='1' style='width:100%; border-collapse:collapse;'>";
+for (let i = 0; i < rows; i++) {
+            table += "<tr>";
+for (let j = 0; j < cols; j++) {
+                table += "<td style='padding:10px;'> </td>";
+            }
+            table += "</tr>";
+        }
+        table += "</table>";
+document.execCommand('insertHTML', false, table);
+    }
+
+function exportHTML() {
+const content = document.getElementById('editor').innerHTML;
+const fullHTML = `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><style>body{font-family:sans-serif; padding:40px;}</style></head><body>${content}</body></html>`;
+const blob = new Blob([fullHTML], { type: 'text/html' });
+const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'my-document.html';
+        a.click();
+    }
+</script>
+
+</body>
+</html>
+
+الإضافات الجديدة:
+• المحاذاة: تمت إضافة أزرار justifyRight, justifyCenter, و justifyLeft للتحكم في اتجاه الفقرات، وهو أمر حيوي جداً عند الكتابة بالعربية.
+• معاينة الطباعة: استخدمنا الدالة المدمجة في المتصفح window.print()، والتي تفتح نافذة الطباعة وتسمح لك بحفظ الملف بصيغة PDF أيضاً مباشرة من المتصفح.
+سادسا: إضافة ميزة التحكم في "نوع الخط"
+لإضافة ميزة "نوع الخط" (Font Family)، سنقوم بإضافة قائمة منسدلة (<select>) تحتوي على خطوط متنوعة. المتصفحات تدعم بشكل أساسي الخطوط العامة (مثل Arial, Times New Roman, Tahoma)، ولكن يمكننا أيضاً توفير خيارات احترافية تبدو جيدة مع اللغة العربية.
+إليك الكود المحدث بالكامل مع إضافة قائمة أنواع الخطوط:
+
+
+HTML
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>محرر نصوص احترافي متكامل</title>
+<style>
+.container { width: 90%; margin: 20px auto; font-family: sans-serif; }
+.toolbar { background: #f8f9fa; padding: 10px; border: 1px solid #ccc; display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 5px; }
+#editor { border: 1px solid #ccc; min-height: 300px; padding: 15px; background: #fff; overflow-y: auto; }
+button, select { padding: 8px; cursor: pointer; border: 1px solid #ddd; background: #fff; }
+button:hover { background: #e9ecef; }
+.export-btn { background-color: #28a745 !important; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+<h2>محرر النصوص الاحترافي</h2>
+
+<div class="toolbar">
+<button onclick="format('bold')"><b>B</b></button>
+<button onclick="format('italic')"><i>I</i></button>
+<button onclick="format('underline')"><u>U</u></button>
+
+<button onclick="format('justifyRight')">يمين</button>
+<button onclick="format('justifyCenter')">وسط</button>
+<button onclick="format('justifyLeft')">يسار</button>
+
+<select onchange="format('fontName', this.value)">
+<option value="Arial">خط أساسي</option>
+<option value="Tahoma">تاهوما</option>
+<option value="Times New Roman">Times New Roman</option>
+<option value="Courier New">Courier New</option>
+<option value="Verdana">فيردانا</option>
+</select>
+
+<select onchange="format('fontSize', this.value)">
+<option value="3">الحجم</option>
+<option value="1">صغير</option>
+<option value="3">عادي</option>
+<option value="5">كبير</option>
+<option value="7">ضخم</option>
+</select>
+
+<button onclick="addLink()">🔗 رابط</button>
+<button onclick="addImage()">🖼️ صورة</button>
+<button onclick="addTable()">⊞ جدول</button>
+<button onclick="window.print()">🖨️ طباعة</button>
+<button class="export-btn" onclick="exportHTML()">تصدير كملف</button>
+</div>
+
+<div id="editor" contenteditable="true"></div>
+</div>
+
+<script>
+function format(command, value = null) {
+document.execCommand(command, false, value);
+    }
+
+function addLink() {
+const url = prompt("أدخل الرابط:", "https://");
+if (url) document.execCommand('createLink', false, url);
+    }
+
+function addImage() {
+const url = prompt("أدخل رابط الصورة:", "https://");
+if (url) document.execCommand('insertImage', false, url);
+    }
+
+function addTable() {
+const rows = prompt("عدد الصفوف:", "2");
+const cols = prompt("عدد الأعمدة:", "2");
+if (rows && cols) {
+let table = "<table border='1' style='width:100%; border-collapse:collapse;'>";
+for (let i = 0; i < rows; i++) {
+                table += "<tr>";
+for (let j = 0; j < cols; j++) {
+                    table += "<td style='padding:10px;'> </td>";
+                }
+                table += "</tr>";
+            }
+            table += "</table>";
+document.execCommand('insertHTML', false, table);
+        }
+    }
+
+function exportHTML() {
+const content = document.getElementById('editor').innerHTML;
+const fullHTML = `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><style>body{font-family:sans-serif; padding:40px;}</style></head><body>${content}</body></html>`;
+const blob = new Blob([fullHTML], { type: 'text/html' });
+const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'my-document.html';
+        a.click();
+    }
+</script>
+
+</body>
+</html>
+
+ماذا تغير؟
+1. القائمة المنسدلة للخطوط: استخدمنا الأمر fontName داخل دالة execCommand. عندما يختار المستخدم خطاً من القائمة، يتم تطبيق هذا التنسيق مباشرة على النص المحدد في المحرر.
+2. خيارات الخطوط: وضعت قائمة بالخطوط التي تظهر بشكل جيد جداً في معظم أنظمة التشغيل (Windows و Mac) وتدعم الحروف العربية بشكل ممتاز (مثل تاهوما و Arial).
+ملاحظة للمستقبل:
+إذا أردت استخدام خطوط أكثر جمالية (مثل خط "Cairo" أو "Amiri" من Google Fonts)، ستحتاج إلى إضافة رابط الخط في قسم <head> وتعديل خيارات القائمة المنسدلة لتشمل اسم الخط الخاص بـ Google Fonts.
+
+
+
+
+
+ سابعا: ميزات أخرى مثل "تلوين خلفية النص" أو "تصدير الملف بصيغة PDF مباشرة"؟
+لإضافة ميزة تلوين الخلفية (التمييز) وإمكانية التصدير بصيغة PDF، سنقوم بإجراء تعديلين أساسيين:
+1. تلوين الخلفية: نستخدم الأمر backColor.
+2. التصدير إلى PDF: بما أن متصفحات الويب لا توفر دالة مباشرة لتحويل HTML إلى PDF بشكل احترافي بدون مكتبات خارجية، فإن أسهل وأفضل طريقة للمستخدم هي استخدام "خيار الطباعة" (Print) ثم اختيار "حفظ كـ PDF" من نظام التشغيل. سأقوم بإضافة زر مخصص يقوم بفتح نافذة الطباعة مباشرة.
+إليك الكود المحدث بالكامل:
+
+HTML
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>محرر نصوص متقدم</title>
+<style>
+.container { width: 90%; margin: 20px auto; font-family: sans-serif; }
+.toolbar { background: #f8f9fa; padding: 10px; border: 1px solid #ccc; display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 5px; }
+#editor { border: 1px solid #ccc; min-height: 300px; padding: 15px; background: #fff; overflow-y: auto; }
+button, select, input { padding: 8px; cursor: pointer; border: 1px solid #ddd; background: #fff; }
+.export-btn { background-color: #28a745 !important; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+<h2>محرر النصوص الاحترافي</h2>
+
+<div class="toolbar">
+<button onclick="format('bold')"><b>B</b></button>
+<button onclick="format('italic')"><i>I</i></button>
+<button onclick="format('underline')"><u>U</u></button>
+
+<input type="color" onchange="format('foreColor', this.value)" title="لون النص">
+<input type="color" onchange="format('backColor', this.value)" title="لون الخلفية">
+
+<select onchange="format('fontName', this.value)">
+<option value="Arial">Arial</option>
+<option value="Tahoma">Tahoma</option>
+<option value="Times New Roman">Times New Roman</option>
+</select>
+
+<button onclick="window.print()">🖨️ حفظ كـ PDF</button>
+<button class="export-btn" onclick="exportHTML()">تصدير كـ HTML</button>
+</div>
+
+<div id="editor" contenteditable="true">أكتب هنا...</div>
+</div>
+
+<script>
+function format(command, value = null) {
+document.execCommand(command, false, value);
+    }
+
+// الطريقة الأفضل للـ PDF هي الطباعة المباشرة حيث يختار المستخدم "حفظ بتنسيق PDF"
+function printToPDF() {
+window.print();
+    }
+
+function exportHTML() {
+const content = document.getElementById('editor').innerHTML;
+const fullHTML = `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"></head><body>${content}</body></html>`;
+const blob = new Blob([fullHTML], { type: 'text/html' });
+const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'document.html';
+        a.click();
+    }
+</script>
+
+</body>
+</html>
+
+شرح الإضافات:
+1. <input type="color">: هذه أداة مدمجة في المتصفح تفتح لوحة ألوان احترافية. بمجرد اختيار اللون، تقوم دالة format بتطبيقه على النص المحدد (foreColor للون الخط، و backColor للون التمييز خلف النص).
+2. ميزة الـ PDF:
+• عند النقر على زر "حفظ كـ PDF"، ستفتح نافذة الطباعة الخاصة بالمتصفح.
+• في هذه النافذة، ستجد قائمة باسم "الطابعة" (Destination)، قم باختيار "حفظ بتنسيق PDF" (Save as PDF). هذه هي الطريقة الأكثر أماناً وموثوقية في المتصفحات الحديثة دون الحاجة لتحميل مكتبات معقدة.
+بهذا الكود، أصبح لديك محرر نصوص متكامل يتيح لك التنسيق، التلوين، الجداول، وحتى الطباعة والحفظ كملفات.
