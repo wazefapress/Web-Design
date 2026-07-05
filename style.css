@@ -1,0 +1,57 @@
+/* 1. تنسيق جسم الصفحة بالكامل */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* تغيير نوع الخط */
+    background-color: #f4f4f9; /* لون خلفية رمادي فاتح جداً */
+    color: #333333; /* لون نص رمادي غامق ليكون مريحاً للعين */
+    margin: 0; /* إزالة الهوامش الافتراضية المزعجة */
+    padding: 0;
+    line-height: 1.6; /* تباعد الأسطر لتسهيل القراءة */
+}
+
+/* 2. تنسيق رأس الصفحة (Header) */
+header {
+    background-color: #2c3e50; /* لون خلفية كحلي غامق */
+    color: white; /* لون النص أبيض */
+    text-align: center; /* توسيط النص */
+    padding: 20px 0; /* مساحة فارغة من الأعلى والأسفل */
+}
+
+/* 3. تنسيق قائمة التنقل (Navigation) */
+nav ul {
+    list-style-type: none; /* إزالة النقاط السوداء من القائمة */
+    padding: 0;
+    display: flex; /* عرض عناصر القائمة بجانب بعضها */
+    justify-content: center; /* توسيط العناصر في المنتصف */
+    gap: 20px; /* مسافة بين كل رابط والآخر */
+}
+
+/* 4. تنسيق الروابط داخل القائمة */
+nav a {
+    color: #18bc9c; /* لون أخضر جميل للروابط */
+    text-decoration: none; /* إزالة الخط الموجود تحت الروابط */
+    font-weight: bold; /* جعل الخط عريضاً */
+    font-size: 18px;
+}
+
+/* 5. تأثير عند مرور الماوس فوق الروابط (Hover) */
+nav a:hover {
+    color: white; /* يتغير اللون للأبيض عند مرور الماوس */
+}
+
+/* 6. تنسيق المحتوى الرئيسي وتذييل الصفحة */
+main {
+    max-width: 800px; /* تحديد أقصى عرض للمحتوى حتى لا يمتد لآخر الشاشة */
+    margin: 30px auto; /* توسيط المحتوى في الشاشة */
+    padding: 20px;
+    background-color: white; /* خلفية بيضاء للمحتوى */
+    box-shadow: 0 0 10px rgba(0,0,0,0.1); /* ظل خفيف وجميل حول المربع */
+    border-radius: 8px; /* تدوير الزوايا قليلاً */
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #2c3e50;
+    color: white;
+    margin-top: 40px;
+}

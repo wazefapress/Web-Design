@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اتصل بي - موقعي الشخصي</title>
+</head>
+<body>
+
+    <header>
+        <h1>تواصل معي</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">الرئيسية</a></li>
+                <li><a href="resume.html">خبراتي ومهاراتي</a></li>
+                <li><a href="portfolio.html">معرض الأعمال</a></li>
+                <li><a href="contact.html">اتصل بي</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section>
+            <h2>أرسل لي رسالة مباشرة</h2>
+            <p>يسعدني تواصلك معي. يرجى ملء النموذج أدناه وسأقوم بالرد عليك في أقرب وقت.</p>
+
+            <form action="#" method="POST">
+                
+                <p>
+                    <label for="username">الاسم الكامل:</label><br>
+                    <input type="text" id="username" name="name" placeholder="اكتب اسمك الثلاثي هنا" required>
+                </p>
+
+                <p>
+                    <label for="useremail">البريد الإلكتروني:</label><br>
+                    <input type="email" id="useremail" name="email" placeholder="example@mail.com" required>
+                </p>
+
+                <p>
+                    <label for="userphone">رقم الهاتف:</label><br>
+                    <input type="tel" id="userphone" name="phone" placeholder="05xxxxxxxx">
+                </p>
+
+                <p>
+                    <label for="reason">سبب التواصل:</label><br>
+                    <select id="reason" name="subject">
+                        <option value="job">عرض عمل / توظيف</option>
+                        <option value="project">طلب بناء موقع ويب</option>
+                        <option value="inquiry">استفسار عام</option>
+                        <option value="other">أخرى</option>
+                    </select>
+                </p>
+
+                <p>
+                    <label for="usermessage">نص الرسالة:</label><br>
+                    <textarea id="usermessage" name="message" rows="6" cols="40" placeholder="اكتب تفاصيل رسالتك هنا..." required></textarea>
+                </p>
+
+                <p>
+                    <button type="submit">إرسال الرسالة</button>
+                    <button type="reset">مسح الحقول</button>
+                </p>
+
+            </form>
+            </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 جميع الحقوق محفوظة لشخصك الكريم.</p>
+    </footer>
+
+</body>
+</html>
