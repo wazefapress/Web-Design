@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+    <title>حرب الفضاء - أصوات وتأثيرات</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            touch-action: none; 
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        canvas {
+            box-shadow: 0 0 20px rgba(255, 100, 0, 0.4);
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+</head>
+<body>
+
+    <script>
+        class SpaceShooterMobile extends Phaser.Scene {
+            constructor() {
+                super({ key: 'SpaceShooterMobile' });
+            }
+
+            // 1. تحميل الأصوات (Preload)
+            preload() {
+                // استخدام روابط مباشرة من مكتبة أمثلة Phaser لتجنب مشاكل الروابط
+                this.load.audio('shootSound', 'https://labs.phaser.io/assets/audio/SoundEffects/blaster.mp3');
+                this.load.audio('explosionSound', 'https://labs.phaser.io/assets/audio/SoundEffects/explosion.mp3');
+                this.load.audio('gameOverSound', 'https://labs.phaser.io/assets/audio/SoundEffects/squit.mp3');
+            }
+
+            create() {
+                this.generateTextures();
+
+                // إضافة الأصوات إلى المشهد والتحكم في درجة الصوت
+                this.sfxShoot = this.sound.add('shootSound', { volume: 0.3 });
+                this.sfxExplode = this.sound.add('explosionSound', { volume: 0.5 });
+                this.sfxGameOver = this.sound.add('gameOverSound', { volume: 0.8 });
+
+                // إعداد اللاعب
+                this.player = this.physics.add.sprite(300, 700, 'player');
+                this.player.setCollideWorldBounds(true);
+                this.player.setDepth(10); // جعل اللاعب فوق النار
+
+                // 2. نظام الجسيمات للنار المتوهجة خلف المركبة (Particles)
+                this.flames = this.add.particles(0, 0, 'fire', {
+                    speed: 150,
+                    angle: { min: 80, max: 100 }, // اتجاه النار للأسفل
+                    scale: { start: 1.5, end: 0 }, // تبدأ كبيرة وتختفي
+                    blendMode: 'ADD', // دمج الألوان لتعطي تأثير التوهج
+                    lifespan: 300,
+                    gravityY: 300,
+                    tint: [ 0xffaa00, 0xff0000, 0xff5500 ] // تدرج ألوان النار
+                });
+                
+                // جعل النار تتبع اللاعب وتظهر أسفله مباشرة
+                this.flames.startFollow(this.player, 0, 20);
+
+                this.bullets = this.physics.add.group();
+                this.enemies = this.physics.add.group();
+
+                this.score = 0;
+                this.scoreText = this.add.text(20, 20, 'النقاط: 0', { 
+                    fontSize: '28px', 
+                    fill: '#fff',
+                    fontFamily: 'Arial',
+                    fontWeight: 'bold'
+                });
+                this.scoreText.setDepth(20);
+
+                this.enemyTimer = this.time.addEvent({
+                    delay: 1000,
+                    callback: this.spawnEnemy,
+                    callbackScope: this,
+                    loop: true
+                });
+
+                this.physics.add.overlap(this.bullets, this.enemies, this.hitEnemy, null, this);
+                this.physics.add.overlap(this.player, this.enemies, this.hitPlayer, null, this);
+
+                this.lastFired = 0;
+                this.isGameOver = false;
+            }
+
+            update(time, delta) {
+                if (this.isGameOver) return;
+
+                let pointer = this.input.activePointer;
+
+                if (pointer.isDown) {
+                    this.player.x = Phaser.Math.Linear(this.player.x, pointer.x, 0.15);
+                    this.player.y = Phaser.Math.Linear(this.player.y, pointer.y - 40, 0.15);
+
+                    if (time > this.lastFired) {
+                        this.shoot();
+                        this.lastFired = time + 200; // تقليل سرعة الإطلاق قليلاً لتناسب الصوت
+                    }
+                }
+
+                this.bullets.children.each(bullet => {
+                    if (bullet.active && bullet.y < 0) bullet.destroy();
+                });
+
+                this.enemies.children.each(enemy => {
+                    if (enemy.active && enemy.y > 850) enemy.destroy();
+                });
+            }
+
+            shoot() {
+                let bullet = this.bullets.create(this.player.x, this.player.y - 30, 'bullet');
+                if (bullet) {
+                    bullet.setVelocityY(-600);
+                    // تشغيل صوت الإطلاق
+                    this.sfxShoot.play();
+                }
+            }
+
+            spawnEnemy() {
+                let xPosition = Phaser.Math.Between(40, 560);
+                let enemy = this.enemies.create(xPosition, -50, 'enemy');
+                if (enemy) {
+                    enemy.setVelocityY(200 + (this.score * 0.8)); 
+                }
+            }
+spawnEnemy() {
+                let xPosition = Phaser.Math.Between(40, 560);
+                
+                // استخدام صورة الطبق الطائر (ufo) بدلاً من المربع الأحمر
+                let enemy = this.enemies.create(xPosition, -50, 'ufo');
+                
+                if (enemy) {
+                    enemy.setVelocityY(200 + (this.score * 0.8)); 
+                    
+                    // جعل الطبق الطائر يدور حول نفسه ليعطي شكلاً جميلاً
+                    enemy.setAngularVelocity(Phaser.Math.Between(-150, 150));
+                    
+                    // تصغير حجم الصورة قليلاً لتناسب الشاشة
+                    enemy.setScale(0.8);
+                }
+            }
+
+            hitEnemy(bullet, enemy) {
+                bullet.destroy();
+                enemy.destroy();
+                this.score += 10;
+                this.scoreText.setText('النقاط: ' + this.score);
+                
+                // تشغيل صوت الانفجار
+                this.sfxExplode.play();
+            }
+
+            hitPlayer(player, enemy) {
+                this.isGameOver = true;
+                this.physics.pause(); 
+                this.enemyTimer.remove(); 
+                this.flames.stop(); // إيقاف نار المحرك عند الخسارة
+                player.setTint(0xff0000); 
+
+                // تشغيل صوت الخسارة
+                this.sfxGameOver.play();
+                
+                this.add.text(300, 350, 'GAME OVER\nالمس الشاشة لإعادة اللعب', { 
+                    fontSize: '40px', 
+                    fill: '#ff0000', 
+                    align: 'center',
+                    fontFamily: 'Arial',
+                    fontWeight: 'bold',
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    padding: { x: 20, y: 20 }
+                }).setOrigin(0.5).setDepth(20);
+
+                this.time.delayedCall(1000, () => {
+                    this.input.once('pointerdown', () => {
+                        this.scene.restart();
+                    });
+                });
+            }
+
+            generateTextures() {
+                let graphics = this.add.graphics();
+
+                // اللاعب
+                graphics.fillStyle(0x00ffff, 1);
+                graphics.fillTriangle(20, 0, 0, 40, 40, 40);
+                graphics.generateTexture('player', 40, 40);
+                graphics.clear();
+
+                // العدو
+                graphics.fillStyle(0xff0000, 1);
+                graphics.fillRect(0, 0, 35, 35);
+                graphics.generateTexture('enemy', 35, 35);
+                graphics.clear();
+
+                // الليزر
+                graphics.fillStyle(0xffff00, 1);
+                graphics.fillRoundedRect(0, 0, 6, 20, 3);
+                graphics.generateTexture('bullet', 6, 20);
+                graphics.clear();
+
+                // تصميم جسيم النار (دائرة صغيرة متوهجة)
+                graphics.fillStyle(0xffffff, 1);
+                graphics.fillCircle(8, 8, 8);
+                graphics.generateTexture('fire', 16, 16);
+                graphics.destroy();
+            }
+        }
+
+        const config = {
+            type: Phaser.AUTO,
+            scale: {
+                mode: Phaser.Scale.FIT,
+                autoCenter: Phaser.Scale.CENTER_BOTH,
+                width: 600,
+                height: 800
+            },
+            backgroundColor: '#02020a',
+            physics: {
+                default: 'arcade',
+                arcade: { debug: false }
+            },
+            scene: SpaceShooterMobile
+        };
+
+        const game = new Phaser.Game(config);
+    </script>
+
+</body>
+</html>
