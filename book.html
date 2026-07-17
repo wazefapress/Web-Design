@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>كتابي الرقمي المتجاوب</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+    
+    <style>
+        .sky-theme { background-color: #f0f9ff; }
+        .page { background: white; padding: 20px; border: 1px solid #bae6fd; overflow: hidden; box-sizing: border-box; }
+        .highlight { background-color: #fde047; padding: 2px; border-radius: 4px; }
+        /* ضمان أن الكتاب يملأ حاويته */
+        #flipbook { margin: 0 auto; }
+    </style>
+</head>
+<body class="sky-theme min-h-screen flex flex-col md:flex-row">
+
+    <!-- القائمة الجانبية -->
+    <aside class="w-full md:w-64 bg-sky-600 text-white p-6 shadow-xl z-10">
+        <h2 class="text-xl font-bold mb-6">فهرس المحتويات</h2>
+        <input type="text" id="search" placeholder="بحث داخل الكتاب..." class="w-full p-2 text-black mb-6 rounded focus:ring-2 focus:ring-sky-300 outline-none">
+        
+        <ul id="chapters" class="space-y-4 font-semibold">
+            <li class="cursor-pointer hover:text-sky-200 transition" onclick="jumpToChapter(1)">• المقدمة (صفحة 1)</li>
+            <li class="cursor-pointer hover:text-sky-200 transition" onclick="jumpToChapter(3)">• الفصل الأول (صفحة 3)</li>
+            <li class="cursor-pointer hover:text-sky-200 transition" onclick="jumpToChapter(5)">• الخاتمة (صفحة 5)</li>
+        </ul>
+        
+        <button onclick="shareApp()" class="mt-10 w-full bg-sky-800 hover:bg-sky-900 transition p-3 rounded font-bold">مشاركة التطبيق</button>
+    </aside>
+
+    <!-- منطقة الكتاب -->
+    <main class="flex-1 flex items-center justify-center p-4 md:p-10 overflow-hidden">
+        <div id="flipbook">
+            <div class="page"><h1>المقدمة</h1><p>مرحباً بك في كتابنا الرقمي المتجاوب.</p></div>
+            <div class="page"><p>محتوى إضافي صفحة 2.</p></div>
+            <div class="page"><h1>الفصل الأول</h1><p>هذا هو الفصل الأول من الكتاب.</p></div>
+            <div class="page"><p>محتوى إضافي صفحة 4.</p></div>
+            <div class="page"><h1>الخاتمة</h1><p>شكراً لقرائتك الكتاب.</p></div>
+            <div class="page"><p>نهاية الكتاب.</p></div>
+        </div>
+    </main>
+
+    <script>
+        function updateBookSize() {
+            var winWidth = $(window).width();
+            var bookWidth = winWidth < 768 ? winWidth * 0.9 : 800;
+            var bookHeight = bookWidth * 0.75;
+            
+            var flipbook = $("#flipbook");
+            if (flipbook.turn("is")) {
+                flipbook.turn("size", bookWidth, bookHeight);
+            } else {
+                flipbook.turn({
+                    width: bookWidth,
+                    height: bookHeight,
+                    autoCenter: true
+                });
+            }
+        }
+
+        $(document).ready(function() {
+            updateBookSize();
+            $(window).resize(updateBookSize);
+
+            // استعادة الصفحة الأخيرة
+            let lastPage = localStorage.getItem("lastPage");
+            if (lastPage) $("#flipbook").turn("page", parseInt(lastPage));
+
+            // حفظ الصفحة عند التصفح
+            $("#flipbook").bind("turned", function(event, page) {
+                localStorage.setItem("lastPage", page);
+            });
+        });
+
+        function jumpToChapter(pageNumber) {
+            $("#flipbook").turn("page", pageNumber);
+        }
+
+        $('#search').on('input', function() {
+            let term = $(this).val();
+            $('.page').each(function() {
+                let $el = $(this);
+                $el.html($el.text().replace(/<span class="highlight">|<\/span>/g, ''));
+                if (term.length > 0) {
+                    let regex = new RegExp('(' + term + ')', 'gi');
+                    $el.html($el.html().replace(regex, '<span class="highlight">$1</span>'));
+                }
+            });
+        });
+
+        function shareApp() {
+            if (navigator.share) {
+                navigator.share({ title: document.title, url: window.location.href });
+            } else {
+                alert("تم نسخ الرابط في الحافظة");
+            }
+        }
+    </script>
+</body>
+</html>
